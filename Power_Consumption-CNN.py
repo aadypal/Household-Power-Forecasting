@@ -1,6 +1,16 @@
-#load and clean-up data\
+#load and clean-up data
 import numpy as np
 import pandas as pd
+import keras
+from math import sqrt
+from numpy import array
+from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Flatten
+from keras.layers.convolutional import Conv1D
+from keras.layers.convolutional import MaxPooling1D
  
 # fill missing values with a value at the same time one day ago
 def fill_missing_data(values):
@@ -35,18 +45,22 @@ print(daily_data.shape)
 # save
 daily_data.to_csv('household_power_consumption_days.csv')
 
+#plot dataset
+dataset = pd.read_csv('household_power_consumption_days.csv', header=0, index_col=0)
+values = dataset.values
+# specify columns to plot
+groups = [0, 1, 2, 3, 5, 6, 7]
+i = 1
+# plot each column
+plt.figure()
+for group in groups:
+	plt.subplot(len(groups), 1, i)
+	plt.plot(values[:, group])
+	plt.title(dataset.columns[group], y=0.5, loc='right')
+	i += 1
+plt.show()
+
 # multichannel multi-step cnn
-import keras
-from math import sqrt
-from numpy import array
-from sklearn.metrics import mean_squared_error
-import matplotlib.pyplot as plt
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import Flatten
-from keras.layers.convolutional import Conv1D
-from keras.layers.convolutional import MaxPooling1D
- 
 # split a multivariate dataset into train/test sets
 def split_dataset(data):
 	# split into standard weeks
@@ -150,11 +164,12 @@ def evaluate_model(train, test, n_input):
 		predictions.append(yhat_sequence)
 		while i<len(test):
 			history.append(test[i, :])
-            
 	# evaluate predictions days for each week
 	predictions = array(predictions)
+	forecast_sequence=predictions[46:]
+	predictions = np.delete(predictions, (46), axis=0)
 	score, scores = evaluate_forecasts(test[:, :, 0], predictions)
-	return score, scores, predictions
+	return score, scores, predictions, forecast_sequence
  
 # load the new file
 dataset = pd.read_csv('household_power_consumption_days.csv', header=0, infer_datetime_format=True, parse_dates=['datetime'], index_col=['datetime'])
@@ -162,21 +177,20 @@ dataset = pd.read_csv('household_power_consumption_days.csv', header=0, infer_da
 train, test = split_dataset(dataset.values)
 # evaluate model and get scores
 n_input = 14
-score, scores, predictions = evaluate_model(train, test, n_input)
+score, scores, predictions, forecast_sequence = evaluate_model(train, test, n_input)
 # summarize scores
 summarize_scores('cnn', score, scores)
 # plot scores
 days = ['sun', 'mon', 'tue', 'wed', 'thr', 'fri', 'sat']
 plt.xlabel('Day')
 plt.ylabel('Loss in KiloWatt for whole day')
-plt.title('Loss for prior one week')
+plt.title('RMSE per Day for 14-day Inputs')
 plt.plot(days, scores, marker='o', label='cnn')
 plt.show()
-predictions.shape
-#predictions=predictions[46:]
-#predictions= np.squeeze(np.asarray(predictions))
-#plt.xlabel('Day')
-#plt.ylabel('Power conjumption for whole day in KiloWatt')
-#plt.title('Forecast for next week')
-#plt.plot(days, predictions, marker='o', label='power conjuption for next week')
-#plt.show()
+forecast_sequence= np.squeeze(np.asarray(forecast_sequence))
+plt.xlabel('Day')
+plt.ylabel('Power conjumption for whole day in KiloWatt')
+plt.title('Forecast for next week')
+plt.plot(days, forecast_sequence, marker='o', label='power conjuption for next week')
+plt.show()
+print(forecast_sequence)
