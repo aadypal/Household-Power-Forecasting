@@ -1,6 +1,16 @@
 #load and clean-up data\
 import numpy as np
 import pandas as pd
+import keras
+from math import sqrt
+from numpy import array
+from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Flatten
+from keras.layers.convolutional import Conv1D
+from keras.layers.convolutional import MaxPooling1D
  
 # fill missing values with a value at the same time one day ago
 def fill_missing_data(values):
@@ -36,17 +46,6 @@ print(daily_data.shape)
 daily_data.to_csv('household_power_consumption_days.csv')
 
 # multichannel multi-step cnn
-import keras
-from math import sqrt
-from numpy import array
-from sklearn.metrics import mean_squared_error
-import matplotlib.pyplot as plt
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import Flatten
-from keras.layers.convolutional import Conv1D
-from keras.layers.convolutional import MaxPooling1D
- 
 # split a multivariate dataset into train/test sets
 def split_dataset(data):
 	# split into standard weeks
@@ -152,9 +151,9 @@ def evaluate_model(train, test, n_input):
 			history.append(test[i, :])
             
 	# evaluate predictions days for each week
-	predictions = array(predictions)
+	forecast_sequence = array(predictions)
 	score, scores = evaluate_forecasts(test[:, :, 0], predictions)
-	return score, scores, predictions
+	return score, scores, forecast_sequence
  
 # load the new file
 dataset = pd.read_csv('household_power_consumption_days.csv', header=0, infer_datetime_format=True, parse_dates=['datetime'], index_col=['datetime'])
@@ -162,7 +161,7 @@ dataset = pd.read_csv('household_power_consumption_days.csv', header=0, infer_da
 train, test = split_dataset(dataset.values)
 # evaluate model and get scores
 n_input = 14
-score, scores, predictions = evaluate_model(train, test, n_input)
+score, scores, forecast_sequence = evaluate_model(train, test, n_input)
 # summarize scores
 summarize_scores('cnn', score, scores)
 # plot scores
@@ -172,10 +171,11 @@ plt.ylabel('Loss in KiloWatt for whole day')
 plt.title('Loss for prior one week')
 plt.plot(days, scores, marker='o', label='cnn')
 plt.show()
-predictions=predictions[46:]
-predictions= np.squeeze(np.asarray(predictions))
+forecast_sequence=forecast_sequence[46:]
+forecast_sequence = np.squeeze(np.asarray(forecast_sequence))
 plt.xlabel('Day')
 plt.ylabel('Power conjumption for whole day in KiloWatt')
 plt.title('Forecast for next week')
-plt.plot(days, predictions, marker='o', label='power conjuption for next week')
+plt.plot(days, forecast_sequence, marker='o', label='power conjuption for next week')
 plt.show()
+print(forecast_sequence)
