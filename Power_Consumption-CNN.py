@@ -172,11 +172,10 @@ plt.ylabel('Loss in KiloWatt for whole day')
 plt.title('Loss for prior one week')
 plt.plot(days, scores, marker='o', label='cnn')
 plt.show()
-predictions.shape
-#predictions=predictions[46:]
-#predictions= np.squeeze(np.asarray(predictions))
-#plt.xlabel('Day')
-#plt.ylabel('Power conjumption for whole day in KiloWatt')
-#plt.title('Forecast for next week')
-#plt.plot(days, predictions, marker='o', label='power conjuption for next week')
-#plt.show()
+predictions=predictions[46:]
+predictions= np.squeeze(np.asarray(predictions))
+plt.xlabel('Day')
+plt.ylabel('Power conjumption for whole day in KiloWatt')
+plt.title('Forecast for next week')
+plt.plot(days, predictions, marker='o', label='power conjuption for next week')
+plt.show()
