@@ -45,6 +45,21 @@ print(daily_data.shape)
 # save
 daily_data.to_csv('household_power_consumption_days.csv')
 
+#plot dataset
+dataset = pd.read_csv('household_power_consumption_days.csv', header=0, index_col=0)
+values = dataset.values
+# specify columns to plot
+groups = [0, 1, 2, 3, 5, 6, 7]
+i = 1
+# plot each column
+plt.figure()
+for group in groups:
+	plt.subplot(len(groups), 1, i)
+	plt.plot(values[:, group])
+	plt.title(dataset.columns[group], y=0.5, loc='right')
+	i += 1
+plt.show()
+
 # multichannel multi-step cnn
 # split a multivariate dataset into train/test sets
 def split_dataset(data):
