@@ -4,5 +4,7 @@ Our problem statement for this project is  “Household power consumption foreca
 
 # Model Implemented:
  CNN,
+ 
  RNN,
+ 
  LSTM
