@@ -136,7 +136,7 @@ def evaluate_model(train, test, n_input):
 	forecast_sequence = array(predictions)
 	score, scores = evaluate_forecasts(test[:, :, 0], predictions)
 	return score, scores, forecast_sequence
- 
+ #define input to the model
 dataset = pd.read_csv('household_power_consumption_days.csv', header=0, infer_datetime_format=True, parse_dates=['datetime'], index_col=['datetime'])
 train, test = split_dataset(dataset.values)
 n_input = 14
@@ -149,6 +149,7 @@ plt.ylabel('Loss in KiloWatt for whole day')
 plt.title('Loss for prior one week')
 plt.plot(days, scores, marker='o', label='cnn')
 plt.show()
+#plot prediction
 forecast_sequence=forecast_sequence[46:]
 forecast_sequence = np.squeeze(np.asarray(forecast_sequence))
 plt.xlabel('Day')
